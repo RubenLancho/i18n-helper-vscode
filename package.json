@@ -1,8 +1,9 @@
 {
-  "name": "i18n-helper-vscode",
-  "displayName": "i18n-helper-vscode",
-  "description": "",
-  "version": "0.0.1",
+  "name": "vscode-i18n-helper",
+  "displayName": "vscode-i18n-helper",
+  "description": "vscode-i18n-helper's a extension to help manage CSV and json for project translate",
+  "version": "1.0.1",
+  "publisher": "RubenLancho",
   "engines": {
     "vscode": "^1.86.0"
   },
@@ -10,23 +11,32 @@
     "Other"
   ],
   "activationEvents": [],
+  "keywords": [
+    "i18n"
+  ],
+  "icon": "static/logo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RubenLancho/vscode-i18n-helper.git"
+  },
+  "homepage": "https://github.com/RubenLancho/vscode-i18n-helper.git",
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "i18n-helper-vscode.compareCSV",
+        "command": "vscode-i18n-helper.compareCSV",
         "title": "Compare CSV"
       },
       {
-        "command": "i18n-helper-vscode.compareJSON",
+        "command": "vscode-i18n-helper.compareJSON",
         "title": "Compare JSONs"
       },
       {
-        "command": "i18n-helper-vscode.generateCSV",
+        "command": "vscode-i18n-helper.generateCSV",
         "title": "Generate CSV"
       },
       {
-        "command": "i18n-helper-vscode.visualizeCSV",
+        "command": "vscode-i18n-helper.visualizeCSV",
         "title": "Visualize CSV"
       }
     ]
@@ -40,7 +50,9 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "deploy": "vsce publish",
+    "build": "vsce package"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
