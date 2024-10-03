@@ -1,6 +1,6 @@
-# i18n-helper-vscode README
+# vscode-i18n-helper README
 
-i18n-helper-vscode's a extension to help manage CSV and json for project translate.
+vscode-i18n-helper's a extension to help manage CSV and json for project translate.
 
 ## Features
 - Visualize CSV

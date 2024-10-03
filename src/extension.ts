@@ -4,11 +4,11 @@ import * as views from "./views";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log(
-    'Congratulations, your extension "i18n-helper-vscode" is now active!'
+    'Congratulations, your extension "vscode-i18n-helper" is now active!'
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('i18n-helper-vscode.visualizeCSV', async () => {
+    vscode.commands.registerCommand('vscode-i18n-helper.visualizeCSV', async () => {
       const panel = vscode.window.createWebviewPanel(
         'CSVViewer',
         'Visualize CSV',
