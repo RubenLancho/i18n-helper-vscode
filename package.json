@@ -2,7 +2,7 @@
   "name": "vscode-i18n-helper",
   "displayName": "vscode-i18n-helper",
   "description": "vscode-i18n-helper's a extension to help manage CSV and json for project translate",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "publisher": "RubenLancho",
   "engines": {
     "vscode": "^1.86.0"

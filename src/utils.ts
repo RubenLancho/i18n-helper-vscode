@@ -2,6 +2,9 @@ import { parse } from "csv-parse";
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as path from "path";
+import { createObjectCsvWriter } from "csv-writer";
+import * as jsonc from "jsonc-parser";
+import * as csvWriter from 'csv-writer';
 
 type JsonObject = Record<string, any>;
 
@@ -23,7 +26,7 @@ export function parseCSV(filePath: string): Promise<any[][]> {
 }
 
 export function generateHTMLTable(data: string[][]): string {
-  let html = '<table border="1">'; 
+  let html = '<table border="1">';
   data.forEach((row, index) => {
     html += '<tr>';
     row.forEach(cell => {
@@ -40,10 +43,10 @@ export function generateHTMLTable(data: string[][]): string {
   return html;
 }
 
-export async function getDirectory(): Promise<string> {
+export async function getDirectory(prompt: string, placeHolder: string): Promise<string> {
   let directoryPath = await vscode.window.showInputBox({
-    prompt: "i18n route",
-    placeHolder: "/Projects/angular/src/assets/i18n/",
+    prompt: prompt,
+    placeHolder: placeHolder,
   });
 
   if (!directoryPath) {
@@ -64,6 +67,22 @@ export async function getDirectory(): Promise<string> {
   }
 
   return directoryPath;
+}
+
+export async function getFile(prompt: string, placeHolder: string): Promise<string> {
+  let filePath = await vscode.window.showInputBox({
+    prompt: prompt,
+    placeHolder: placeHolder,
+  });
+
+  if (
+    filePath === undefined
+  ) {
+    vscode.window.showErrorMessage("The path provided is not a valid.");
+    return "";
+  }
+
+  return filePath;
 }
 
 
@@ -133,4 +152,98 @@ export function addKeys(...jsons: JsonObject[]): void {
       addRecursiveKeys(jsons[i], jsons[j]);
     }
   }
+}
+
+export async function generarCSV(...jsons: JsonObject[]) {
+  let directoryPath = await getDirectory("i18n route", "/Projects/angular/src/assets/i18n/");
+  let files = getFilesInPath(directoryPath);
+  let filePath = await getFile("Path out file .csv", "/Projects/angular/src/assets/i18n/language.csv");
+
+
+  const csvData = jsonToCsv(files);
+  saveCsvToFile(csvData, filePath);
+}
+
+export function getFilesInPath(directoryPath: string): string[] {
+  const files: string[] = [];
+
+  const containDirectory = fs.readdirSync(directoryPath);
+
+  containDirectory.forEach((item) => {
+    const completePath = path.join(directoryPath, item);
+    const isDirectory = fs.statSync(completePath).isDirectory();
+
+    if (!isDirectory) {
+      files.push(completePath);
+    }
+  });
+
+  return files;
+}
+
+function readJsonFile(filePath: string): any {
+  const rawData = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(rawData);
+}
+
+function isJsonFile(filePath: string): boolean {
+  return path.extname(filePath).toLowerCase() === '.json';
+}
+
+function jsonToCsv(jsonFiles: string[]): string {
+  let allKeysSet = new Set<string>();
+  let fileData: any[] = [];
+
+  for (const file of jsonFiles) {
+    if (isJsonFile(file)) {
+      const jsonData = readJsonFile(file);
+      fileData.push(jsonData);
+      const extractedKeys = extractKeys(jsonData);
+      extractedKeys.forEach(key => allKeysSet.add(key));
+    }
+  }
+  const allKeysArray = Array.from(allKeysSet).sort();
+  let csvRows: string[] = [];
+
+  for (const key of allKeysArray) {
+    let row = [key];
+    for (const jsonData of fileData) {
+      const value = getValueByPath(jsonData, key) || '';
+      row.push(value);
+    }
+    csvRows.push(row.join(','));
+  }
+
+  return csvRows.join('\n');
+}
+
+function extractKeys(jsonData: any, prefix: string = ''): string[] {
+  let result: string[] = [];
+
+  for (const key in jsonData) {
+    const value = jsonData[key];
+
+    if (typeof value === 'object' && value !== null) {
+      const nestedKeys = extractKeys(value, `${prefix}${key}.`);
+      result = result.concat(nestedKeys);
+    } else {
+      result.push(`${prefix}${key}`);
+    }
+  }
+  return result;
+}
+
+function getValueByPath(jsonData: any, path: string): any {
+  const keys = path.split('.');
+  let value = jsonData;
+
+  for (const key of keys) {
+    value = value ? value[key] : undefined;
+  }
+
+  return value;
+}
+
+function saveCsvToFile(csvData: string, outputPath: string): void {
+  fs.writeFileSync(outputPath, csvData);
 }
