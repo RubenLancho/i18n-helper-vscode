@@ -42,54 +42,61 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "vscode-i18n-helper.compareJSON",
+    vscode.commands.registerCommand('vscode-i18n-helper.compareJSON', async () => {
+      const directoryPath = await utils.getDirectory("i18n route", "/Projects/angular/src/assets/i18n/");
 
-      async () => {
-        const directoryPath = await utils.getDirectory();
+      if (directoryPath === "") {
+        return;
+      }
 
-        if (directoryPath === "") {
+      const pathFiles = utils.getFilesInDirectory(directoryPath);
+
+      let files: any[] = [];
+      pathFiles.forEach((filePath) => {
+        files.push(fs.readFileSync(directoryPath + filePath, "utf-8"));
+      });
+
+      let jsonObjs: any = [];
+
+      files.forEach((file) => {
+        try {
+          jsonObjs.push(jsonc.parse(file));
+        } catch (error) {
+          vscode.window.showErrorMessage("Error to parse JSON: " + error);
           return;
         }
+      });
 
-        const pathFiles = utils.getFilesInDirectory(directoryPath);
+      utils.addKeys(...jsonObjs);
 
-        let files: any[] = [];
-        pathFiles.forEach((filePath) => {
-          files.push(fs.readFileSync(directoryPath + filePath, "utf-8"));
-        });
-
-        let jsonObjs: any = [];
-
-        files.forEach((file) => {
-          try {
-            jsonObjs.push(jsonc.parse(file));
-          } catch (error) {
-            vscode.window.showErrorMessage("Error to parse JSON: " + error);
-            return;
-          }
-        });
-
-        utils.addKeys(...jsonObjs);
-
-        pathFiles.forEach((element, index) => {
-          const sortedAndFilledJsonText = JSON.stringify(
-            jsonObjs[index],
-            null,
-            2
-          );
-
-          fs.writeFileSync(
-            directoryPath + element,
-            sortedAndFilledJsonText,
-            "utf-8"
-          );
-        });
-
-        vscode.window.showInformationMessage(
-          "JSON sorted and completed successfully"
+      pathFiles.forEach((element, index) => {
+        const sortedAndFilledJsonText = JSON.stringify(
+          jsonObjs[index],
+          null,
+          2
         );
-      }
+
+        fs.writeFileSync(
+          directoryPath + element,
+          sortedAndFilledJsonText,
+          "utf-8"
+        );
+      });
+
+      vscode.window.showInformationMessage(
+        "JSON sorted and completed successfully"
+      );
+    }
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vscode-i18n-helper.generateCSV', async () => {
+      utils.generarCSV();
+      vscode.window.showInformationMessage(
+        "CSV sorted and completed successfully"
+      );
+    }
     )
   );
 
